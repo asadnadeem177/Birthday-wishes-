@@ -1,0 +1,290 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uzma | Twenty-Twenty-Six</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;600&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --dark: #08080a;
+            --gold: #d4af37;
+            --rose: #ffafbd;
+            --glass: rgba(255, 255, 255, 0.03);
+            --font-main: 'Outfit', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--dark);
+            color: white;
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            height: 300vh; /* For scrolling journey */
+        }
+
+        /* --- Custom Interactive Cursor --- */
+        #cursor-dot {
+            position: fixed;
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            z-index: 10000;
+            pointer-events: none;
+        }
+        #cursor-blur {
+            position: fixed;
+            width: 40px; height: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            transition: transform 0.15s ease-out;
+        }
+
+        /* --- Background Canvas --- */
+        #canvas-bg {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+            filter: blur(2px);
+        }
+
+        /* --- Sections --- */
+        section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+        }
+
+        /* --- Hero Section --- */
+        .hero-container {
+            text-align: center;
+        }
+
+        .pre-title {
+            font-size: 0.8rem;
+            letter-spacing: 8px;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            opacity: 0;
+        }
+
+        .main-name {
+            font-family: var(--font-serif);
+            font-size: clamp(4rem, 15vw, 10rem);
+            font-style: italic;
+            font-weight: 700;
+            line-height: 0.8;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #fff, var(--gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Countdown Clock --- */
+        .countdown {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+            font-weight: 100;
+        }
+        .time-node { text-align: center; }
+        .time-val { font-size: 2.5rem; display: block; color: white; }
+        .time-label { font-size: 0.6rem; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+
+        /* --- Message Cards --- */
+        .glass-story {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 4rem;
+            max-width: 800px;
+            border-radius: 40px;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        .glass-story h2 {
+            font-family: var(--font-serif);
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .glass-story p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-weight: 300;
+            color: #ccc;
+        }
+
+        /* --- Scroll Indicator --- */
+        .scroll-pill {
+            position: absolute;
+            bottom: 40px;
+            width: 30px;
+            height: 50px;
+            border: 1px solid var(--gold);
+            border-radius: 20px;
+        }
+        .scroll-pill::after {
+            content: '';
+            position: absolute;
+            top: 10px; left: 50%;
+            width: 4px; height: 10px;
+            background: var(--gold);
+            transform: translateX(-50%);
+            border-radius: 2px;
+            animation: scrollMove 2s infinite;
+        }
+
+        @keyframes scrollMove {
+            0% { transform: translate(-50%, 0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(-50%, 20px); opacity: 0; }
+        }
+
+        .highlight { color: var(--gold); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-blur"></div>
+    <canvas id="canvas-bg"></canvas>
+
+    <section id="hero">
+        <div class="hero-container">
+            <p class="pre-title">A MASTERPIECE SINCE 10.02</p>
+            <h1 class="main-name">Uzma.</h1>
+            <div class="countdown" id="timer">
+                <div class="time-node"><span class="time-val" id="days">00</span><span class="time-label">Days</span></div>
+                <div class="time-node"><span class="time-val" id="hours">00</span><span class="time-label">Hours</span></div>
+                <div class="time-node"><span class="time-val" id="mins">00</span><span class="time-label">Mins</span></div>
+                <div class="time-node"><span class="time-val" id="secs">00</span><span class="time-label">Secs</span></div>
+            </div>
+        </div>
+        <div class="scroll-pill"></div>
+    </section>
+
+    <section id="story">
+        <div class="glass-story">
+            <h2>To my best friend,</h2>
+            <p>They say stars are born from collisions, but you were born from <span class="highlight">grace</span>. As we step into Feb 10, 2026, I wanted to remind you that in a world of temporary things, our friendship is the only constant that makes sense.</p>
+            <br>
+            <p>You aren't just a year older; you are a year more <span class="highlight">ethereal</span>.</p>
+        </div>
+    </section>
+
+    <section id="finale">
+        <div class="hero-container">
+            <h2 style="font-family: var(--font-serif); font-size: 4rem; opacity: 0;" id="final-wish">Shine on, Uzma.</h2>
+            <p style="margin-top: 20px; letter-spacing: 5px; opacity: 0;" id="sub-wish">THE GALAXY IS YOURS TODAY.</p>
+        </div>
+    </section>
+
+    <script>
+        // --- Custom Cursor Movement ---
+        const dot = document.getElementById('cursor-dot');
+        const blur = document.getElementById('cursor-blur');
+        
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(blur, { x: e.clientX - 16, y: e.clientY - 16, duration: 0.2 });
+        });
+
+        // --- Background Stars Physics ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.v = Math.random() * 0.3;
+            }
+            update() {
+                this.y -= this.v;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for(let i=0; i<150; i++) stars.push(new Star());
+
+        function animate() {
+            ctx.clearRect(0,0, canvas.width, canvas.height);
+            stars.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(animate);
+        }
+        initCanvas(); animate();
+
+        // --- Countdown Logic (Target Feb 10, 2026) ---
+        function updateTimer() {
+            const target = new Date("February 10, 2026 00:00:00").getTime();
+            const now = new Date().getTime();
+            const diff = target - now;
+
+            if (diff > 0) {
+                document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+                document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById('mins').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('secs').innerText = Math.floor((diff % (1000 * 60)) / 1000);
+            } else {
+                document.getElementById('timer').innerHTML = "<h2 style='color:var(--gold); letter-spacing:5px;'>IT'S YOUR DAY!</h2>";
+            }
+        }
+        setInterval(updateTimer, 1000);
+
+        // --- GSAP Scroll Animations ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.to(".pre-title", { opacity: 1, duration: 1.5, delay: 0.5 });
+        gsap.from(".main-name", { y: 50, opacity: 0, duration: 2, ease: "expo.out", delay: 0.2 });
+
+        gsap.to(".glass-story", {
+            scrollTrigger: {
+                trigger: "#story",
+                start: "top 60%",
+                toggleActions: "play none none reverse"
+            },
+            y: 0,
+            opacity: 1,
+            duration: 1.5,
+            ease: "power4.out"
+        });
+
+        gsap.to("#final-wish", {
+            scrollTrigger: { trigger: "#finale", start: "top 70%" },
+            opacity: 1, y: -20, duration: 2
+        });
+        
+        gsap.to("#sub-wish", {
+            scrollTrigger: { trigger: "#finale", start: "top 65%" },
+            opacity: 0.6, duration: 2, delay: 0.5
+        });
+
+        window.addEventListener('resize', initCanvas);
+    </script>
+</body>
+</html>
